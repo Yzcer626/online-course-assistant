@@ -1,14 +1,6 @@
 // solver.js - 乱选速刷版 (v1.0)
 // 核心逻辑：无脑随机选选项，快速完成题目，不管对错
 
-const KEYS = window.KEYS || {
-    IS_ANSWERING: "cx_is_answering",
-    IS_LEARN_MODE: "cx_is_learn_mode",
-    IS_LEARN_RUNNING: "cx_learn_run",
-    VIDEO_SPEED: "cx_video_speed",
-    IS_QUIZ_MODE: "cx_is_quiz_mode"
-};
-
 const Solver = {
     // 每题最多尝试次数（防无限循环）
     MAX_ATTEMPTS: 5,
