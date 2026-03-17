@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "学习通全能助手 (自动翻页版) - 乱选速刷",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "智能排队刷课、自动翻页、无脑乱选速刷。",
   "permissions": [
     "storage"
