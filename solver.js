@@ -55,32 +55,24 @@ const Solver = {
     
     // 对单个题目随机答题
     randomAnswer: function(qDiv) {
-        // 获取所有选项
         const options = this.getOptions(qDiv);
         if (options.length === 0) {
             console.log("  无选项，跳过");
             return false;
         }
         
-        // 识别题型（单选/多选/判断）
         const type = this.detectType(qDiv);
-        
-        // 根据题型决定随机选几个
         let selectCount = 1;
+        
         if (type === "multiple") {
-            // 多选：也随机选1个（变成单选行为）
-            selectCount = 1;
+            selectCount = Math.min(Math.floor(Math.random() * 2) + 2, options.length);
         } else if (type === "unknown") {
-            // 未知题型：随机选1-3个
             selectCount = Math.min(Math.floor(Math.random() * 3) + 1, options.length);
         }
-        // 单选/判断：默认1个
         
-        // 随机打乱选项
         const shuffled = [...options].sort(() => Math.random() - 0.5);
         const selected = shuffled.slice(0, selectCount);
         
-        // 点击选中的选项
         selected.forEach((opt, idx) => {
             console.log(`  随机选 ${idx+1}: 选项 ${opt.label}`);
             opt.div.click();
@@ -119,37 +111,53 @@ const Solver = {
         return options;
     },
     
-    // 识别题型
     detectType: function(qDiv) {
         const classes = qDiv.className.toLowerCase();
         const id = qDiv.id || "";
         
-        // 常见判断：
-        // 单选题：.single, .single ques, .单选题
-        // 多选题：.multiple, .multi, .多选题
-        // 判断题：.judge, .判断
-        
-        if (classes.includes("single") || classes.includes("singleques") || classes.includes("单选题")) {
+        if (classes.includes("single") || classes.includes("单选")) {
             return "single";
-        } else if (classes.includes("multiple") || classes.includes("multi") || classes.includes("多选题")) {
+        } else if (classes.includes("multiple") || classes.includes("multi") || classes.includes("多选")) {
             return "multiple";
         } else if (classes.includes("judge") || classes.includes("判断")) {
             return "judge";
-        } else {
-            // 通过选项数量推测：
-            // 如果是判断题，通常只有2个选项（对/错）
-            // 如果只有2个选项，可能是判断
-            const options = this.getOptions(qDiv);
-            if (options.length === 2) {
-                return "judge";
-            }
-            // 如果选项很多（5个），可能是单选
-            if (options.length >= 5) {
-                return "single";
-            }
-            // 无法判断，返回 unknown
-            return "unknown";
         }
+        
+        const options = this.getOptions(qDiv);
+        const optionTexts = options.map(opt => opt.label.toLowerCase());
+        
+        if (optionTexts.includes("对") || optionTexts.includes("错") || 
+            optionTexts.includes("√") || optionTexts.includes("×") ||
+            optionTexts.includes("true") || optionTexts.includes("false")) {
+            return "judge";
+        }
+        
+        if (options.length === 2) {
+            return "judge";
+        } else if (options.length > 4) {
+            return "single";
+        }
+        
+        const questionText = qDiv.innerText || "";
+        if (questionText.includes("单选") || questionText.includes("选择一个")) {
+            return "single";
+        } else if (questionText.includes("多选") || questionText.includes("选择多个")) {
+            return "multiple";
+        } else if (questionText.includes("判断") || questionText.includes("是否")) {
+            return "judge";
+        }
+        
+        return "single";
+    },
+    
+    isMultipleChoiceCompleted: function(qDiv) {
+        const options = this.getOptions(qDiv);
+        const selectedOptions = qDiv.querySelectorAll(".check_answer, .check_answer_dx, .selected");
+        
+        const allDisabled = options.every(opt => opt.div.querySelector("input[disabled]"));
+        const hasSelection = selectedOptions.length > 0;
+        
+        return allDisabled || hasSelection;
     },
     
     // 尝试点击提交按钮（如果题目需要提交才批阅）
