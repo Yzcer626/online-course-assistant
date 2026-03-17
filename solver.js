@@ -9,7 +9,7 @@ const Solver = {
     run: function() {
         console.log("🔀 开始乱选模式...");
         
-        const questions = document.querySelectorAll(".questionLi, .singleQuesId, .TiMu, .question-item, .q-item, .TiMu2, .question_div, .ques-item");
+        const questions = document.querySelectorAll(".TiMu, .questionLi, .singleQuesId, .question-item, .q-item, .TiMu2, .question_div, .ques-item");
         let attemptedCount = 0;
         let skippedCount = 0;
         
@@ -98,29 +98,43 @@ const Solver = {
     // 获取题目的所有可选选项
     getOptions: function(qDiv) {
         const options = [];
-        const optionDivs = qDiv.querySelectorAll(".answerBg, li, .singleChoose, .multiChoose, .option-item, .choice-item");
         
-        optionDivs.forEach((div, idx) => {
-            const span = div.querySelector(".num_option, .num_option_dx, .option_span");
-            let label = "";
-            
-            if (span) {
-                label = span.getAttribute("data");  // data="A" 或 "√" 或 "1"
-            } else {
-                // 用 index 推算（假设选项就是 A, B, C, D, E 顺序）
-                label = String.fromCharCode(65 + idx);  // A, B, C...
-            }
-            
-            // 检查是否已选中（避免重复点）
-            const isSelected = span && 
-                (span.classList.contains("check_answer") || 
-                 span.classList.contains("check_answer_dx") ||
-                 span.classList.contains("selected"));
+        const optionSpans = qDiv.querySelectorAll(".num_option_dx, .num_option");
+        
+        optionSpans.forEach((span, idx) => {
+            const label = span.getAttribute("data") || String.fromCharCode(65 + idx);
+            const isSelected = span.classList.contains("check_answer") || 
+                              span.classList.contains("check_answer_dx") ||
+                              span.classList.contains("selected");
             
             if (!isSelected) {
-                options.push({ div, label });
+                options.push({ div: span, label });
             }
         });
+        
+        if (options.length === 0) {
+            const optionDivs = qDiv.querySelectorAll(".answerBg, li, .singleChoose, .multiChoose, .option-item, .choice-item");
+            
+            optionDivs.forEach((div, idx) => {
+                const span = div.querySelector(".num_option, .num_option_dx, .option_span");
+                let label = "";
+                
+                if (span) {
+                    label = span.getAttribute("data");
+                } else {
+                    label = String.fromCharCode(65 + idx);
+                }
+                
+                const isSelected = span && 
+                    (span.classList.contains("check_answer") || 
+                     span.classList.contains("check_answer_dx") ||
+                     span.classList.contains("selected"));
+                
+                if (!isSelected) {
+                    options.push({ div, label });
+                }
+            });
+        }
         
         return options;
     },
@@ -183,16 +197,30 @@ const Solver = {
             "#submitAnswer",
             ".next",
             ".btn-submit",
-            ".answer-submit"
+            ".answer-submit",
+            ".btnSave",
+            "span:contains('提交')"
         ];
         
         for (let sel of selectors) {
             const btn = document.querySelector(sel);
             if (btn && btn.offsetParent !== null) {
                 const text = (btn.innerText || btn.value || "").trim();
-                if (text.includes("提交") || sel.includes("submit") || sel.includes("Submit")) {
+                if (text.includes("提交") || sel.includes("submit") || sel.includes("Submit") || sel.includes("btnSave")) {
                     console.log("找到提交按钮，点击提交...");
                     btn.click();
+                    return true;
+                }
+            }
+        }
+        
+        const allElements = document.querySelectorAll("*");
+        for (let el of allElements) {
+            if (el.offsetParent !== null) {
+                const text = (el.innerText || el.value || "").trim();
+                if (text === "提交" || text.includes("提交")) {
+                    console.log("找到提交按钮（文本匹配），点击提交...");
+                    el.click();
                     return true;
                 }
             }
