@@ -393,7 +393,7 @@ window.addEventListener('message', (event) => {
             }
 
             // --- 板块 3: 自动模式切换（主循环检测）---
-            if (memory[KEYS.IS_LEARN_MODE]) {
+            if (memory[KEYS.IS_LEARN_MODE] && !memory[KEYS.IS_ANSWERING]) {
                 const unanswered = document.querySelectorAll(".questionLi:not(.fontLabel), .singleQuesId:not(.fontLabel)").length;
                 const isQuiz = TaskManager.isQuizPage ? TaskManager.isQuizPage() : false;
                 if ((unanswered > 0 || isQuiz) && !memory[KEYS.IS_LEARN_RUNNING]) {

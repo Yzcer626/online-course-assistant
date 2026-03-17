@@ -1,6 +1,13 @@
 // solver.js - 乱选速刷版 (v1.0)
 // 核心逻辑：无脑随机选选项，快速完成题目，不管对错
 
+const KEYS = window.KEYS || {
+    IS_ANSWERING: "cx_is_answering",
+    IS_LEARN_MODE: "cx_is_learn_mode",
+    IS_LEARN_RUNNING: "cx_learn_run",
+    VIDEO_SPEED: "cx_video_speed"
+};
+
 const Solver = {
     // 每题最多尝试次数（防无限循环）
     MAX_ATTEMPTS: 5,
@@ -40,14 +47,24 @@ const Solver = {
         
         console.log(`✅ 乱选完成：${attemptedCount} 题尝试，${skippedCount} 题跳过`);
         
-        // 4️⃣ 所有未批阅题都尝试后，尝试提交
         setTimeout(() => {
             this.trySubmit();
-            // 5️⃣ 然后翻页
             setTimeout(() => {
-                if (typeof Pagination !== 'undefined') {
-                    console.log("➡️ 准备翻到下一节...");
-                    Pagination.next();
+                const remainingUnanswered = document.querySelectorAll(".questionLi:not(.fontLabel), .singleQuesId:not(.fontLabel)").length;
+                if (remainingUnanswered === 0 && typeof Pagination !== 'undefined') {
+                    console.log("➡️ 所有题目已完成，准备翻到下一节...");
+                    if (typeof State !== 'undefined') {
+                        State.set({
+                            [KEYS.IS_ANSWERING]: false,
+                            [KEYS.IS_LEARN_MODE]: true,
+                            [KEYS.IS_LEARN_RUNNING]: false
+                        });
+                    }
+                    setTimeout(() => {
+                        Pagination.next();
+                    }, 1000);
+                } else {
+                    console.log(`⚠️ 还有 ${remainingUnanswered} 道未答题，等待用户处理...`);
                 }
             }, 2000);
         }, 2000);
