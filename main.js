@@ -175,7 +175,8 @@ const TaskManager = {
                         this.stop();
                         State.set({
                             [KEYS.IS_LEARN_MODE]: false,
-                            [KEYS.IS_ANSWERING]: true
+                            [KEYS.IS_ANSWERING]: true,
+                            [KEYS.IS_QUIZ_MODE]: true
                         });
                         return;
                     } else {
@@ -336,20 +337,28 @@ const TaskManager = {
         
         console.log("[isQuizPage] 返回 false");
         return false;
-    }
-};
-
-window.addEventListener('message', (event) => {
-    if (event.data && event.data.action === 'TASK_FINISHED') {
-        const typeName = event.data.type === 'video' ? '视频' : '文档/PPT';
-        toast(`✅ ${typeName} 任务完毕！2秒后开启下一个...`);
-        TaskManager.currentIndex++;
-
-        if (TaskManager.isRunning) {
-            setTimeout(() => TaskManager.runNext(), 2000);
         }
-    }
-});
+    };
+    
+    window.addEventListener('message', (event) => {
+        if (event.data && event.data.action === 'TASK_FINISHED') {
+            const typeName = event.data.type === 'video' ? '视频' : '文档/PPT';
+            toast(`✅ ${typeName} 任务完毕！2秒后开启下一个...`);
+            TaskManager.currentIndex++;
+    
+            if (TaskManager.isRunning) {
+                setTimeout(() => TaskManager.runNext(), 2000);
+            }
+        }
+    });
+    
+    window.addEventListener('load', () => {
+        if (typeof State !== 'undefined') {
+            State.set({
+                [KEYS.IS_QUIZ_MODE]: false
+            });
+        }
+    });
 
 // ==========================================
 // 3. 全局核心大循环 (刷课/乱选 两足鼎立)
@@ -393,14 +402,15 @@ window.addEventListener('message', (event) => {
             }
 
             // --- 板块 3: 自动模式切换（主循环检测）---
-            if (memory[KEYS.IS_LEARN_MODE] && !memory[KEYS.IS_ANSWERING]) {
+            if (memory[KEYS.IS_LEARN_MODE] && !memory[KEYS.IS_ANSWERING] && !memory[KEYS.IS_QUIZ_MODE]) {
                 const unanswered = document.querySelectorAll(".questionLi:not(.fontLabel), .singleQuesId:not(.fontLabel)").length;
                 const isQuiz = TaskManager.isQuizPage ? TaskManager.isQuizPage() : false;
                 if ((unanswered > 0 || isQuiz) && !memory[KEYS.IS_LEARN_RUNNING]) {
                     console.log(`🔄 自动切换：刷课完成，检测到${unanswered > 0 ? ` ${unanswered} 道未答题` : ''}${isQuiz ? ' 测验页面' : ''}`);
                     State.set({
                         [KEYS.IS_LEARN_MODE]: false,
-                        [KEYS.IS_ANSWERING]: true
+                        [KEYS.IS_ANSWERING]: true,
+                        [KEYS.IS_QUIZ_MODE]: true
                     }, () => {
                         document.querySelectorAll("[data-cx-solved]").forEach(el => {
                             el.removeAttribute("data-cx-solved");

@@ -5,7 +5,8 @@ const KEYS = window.KEYS || {
     IS_ANSWERING: "cx_is_answering",
     IS_LEARN_MODE: "cx_is_learn_mode",
     IS_LEARN_RUNNING: "cx_learn_run",
-    VIDEO_SPEED: "cx_video_speed"
+    VIDEO_SPEED: "cx_video_speed",
+    IS_QUIZ_MODE: "cx_is_quiz_mode"
 };
 
 const Solver = {
@@ -55,25 +56,22 @@ const Solver = {
         console.log(`✅ 乱选完成：${attemptedCount} 题尝试，${skippedCount} 题跳过`);
         
         setTimeout(() => {
-            this.trySubmit();
-            setTimeout(() => {
-                const remainingUnanswered = document.querySelectorAll(".questionLi:not(.fontLabel), .singleQuesId:not(.fontLabel)").length;
-                if (remainingUnanswered === 0 && typeof Pagination !== 'undefined') {
-                    console.log("➡️ 所有题目已完成，准备翻到下一节...");
+            const submitted = this.trySubmit();
+            if (submitted) {
+                console.log("📝 已提交答案，等待页面跳转...");
+                setTimeout(() => {
                     if (typeof State !== 'undefined') {
                         State.set({
                             [KEYS.IS_ANSWERING]: false,
                             [KEYS.IS_LEARN_MODE]: true,
-                            [KEYS.IS_LEARN_RUNNING]: false
+                            [KEYS.IS_LEARN_RUNNING]: false,
+                            [KEYS.IS_QUIZ_MODE]: false
                         });
                     }
-                    setTimeout(() => {
-                        Pagination.next();
-                    }, 1000);
-                } else {
-                    console.log(`⚠️ 还有 ${remainingUnanswered} 道未答题，等待用户处理...`);
-                }
-            }, 2000);
+                }, 3000);
+            } else {
+                console.log("⚠️ 未找到提交按钮，等待用户处理...");
+            }
         }, 2000);
     },
     
@@ -184,26 +182,27 @@ const Solver = {
         return allDisabled || hasSelection;
     },
     
-    // 尝试点击提交按钮（如果题目需要提交才批阅）
     trySubmit: function() {
-        // 常见的提交按钮选择器
         const selectors = [
             "button[type='submit']",
             "input[type='submit']",
             ".submitBtn",
             "#submit",
             "#submitAnswer",
-            "button:contains('提交')",
-            "a:contains('提交')",
-            ".next:contains('提交')"
+            ".next",
+            ".btn-submit",
+            ".answer-submit"
         ];
         
         for (let sel of selectors) {
             const btn = document.querySelector(sel);
             if (btn && btn.offsetParent !== null) {
-                console.log("找到提交按钮，点击提交...");
-                btn.click();
-                return true;
+                const text = (btn.innerText || btn.value || "").trim();
+                if (text.includes("提交") || sel.includes("submit") || sel.includes("Submit")) {
+                    console.log("找到提交按钮，点击提交...");
+                    btn.click();
+                    return true;
+                }
             }
         }
         

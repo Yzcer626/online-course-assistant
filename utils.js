@@ -15,5 +15,6 @@ const KEYS = {
     IS_ANSWERING: "cx_is_answering",
     IS_LEARN_MODE: "cx_is_learn_mode",
     IS_LEARN_RUNNING: "cx_learn_run",
-    VIDEO_SPEED: "cx_video_speed"
+    VIDEO_SPEED: "cx_video_speed",
+    IS_QUIZ_MODE: "cx_is_quiz_mode"
 };
