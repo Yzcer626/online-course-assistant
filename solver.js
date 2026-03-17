@@ -16,7 +16,7 @@ const Solver = {
     run: function() {
         console.log("🔀 开始乱选模式...");
         
-        const questions = document.querySelectorAll(".questionLi, .singleQuesId, .TiMu, .question-item, .q-item");
+        const questions = document.querySelectorAll(".questionLi, .singleQuesId, .TiMu, .question-item, .q-item, .TiMu2, .question_div, .ques-item");
         let attemptedCount = 0;
         let skippedCount = 0;
         
@@ -31,6 +31,13 @@ const Solver = {
             // 2️⃣ 跳过已标记 solved 的（防止重复）
             if (qDiv.getAttribute("data-cx-solved")) {
                 console.log(`题 ${index+1}: 已乱选过，跳过`);
+                skippedCount++;
+                return;
+            }
+            
+            const options = this.getOptions(qDiv);
+            if (options.length === 0) {
+                console.log(`题 ${index+1}: 无选项，跳过`);
                 skippedCount++;
                 return;
             }
