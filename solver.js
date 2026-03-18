@@ -189,7 +189,27 @@ const Solver = {
     },
     
     trySubmit: function() {
+        const btnSubmit = document.querySelector(".btnSubmit");
+        if (btnSubmit && btnSubmit.offsetParent !== null) {
+            console.log("找到 .btnSubmit 提交按钮，点击提交...");
+            btnSubmit.click();
+            return true;
+        }
+        
+        const buttons = document.querySelectorAll("button, a, input[type='button'], input[type='submit']");
+        for (let btn of buttons) {
+            if (btn.offsetParent !== null) {
+                const text = (btn.innerText || btn.value || btn.textContent || "").trim();
+                if (text === "提交" || text.includes("提交")) {
+                    console.log("找到提交按钮（文本匹配），点击提交...");
+                    btn.click();
+                    return true;
+                }
+            }
+        }
+        
         const selectors = [
+            ".btnSubmit",
             "button[type='submit']",
             "input[type='submit']",
             ".submitBtn",
@@ -197,32 +217,15 @@ const Solver = {
             "#submitAnswer",
             ".next",
             ".btn-submit",
-            ".answer-submit",
-            ".btnSave",
-            "span:contains('提交')"
+            ".answer-submit"
         ];
         
         for (let sel of selectors) {
             const btn = document.querySelector(sel);
             if (btn && btn.offsetParent !== null) {
-                const text = (btn.innerText || btn.value || "").trim();
-                if (text.includes("提交") || sel.includes("submit") || sel.includes("Submit") || sel.includes("btnSave")) {
-                    console.log("找到提交按钮，点击提交...");
-                    btn.click();
-                    return true;
-                }
-            }
-        }
-        
-        const allElements = document.querySelectorAll("*");
-        for (let el of allElements) {
-            if (el.offsetParent !== null) {
-                const text = (el.innerText || el.value || "").trim();
-                if (text === "提交" || text.includes("提交")) {
-                    console.log("找到提交按钮（文本匹配），点击提交...");
-                    el.click();
-                    return true;
-                }
+                console.log(`找到提交按钮（选择器：${sel}），点击提交...`);
+                btn.click();
+                return true;
             }
         }
         

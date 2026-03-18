@@ -89,7 +89,14 @@ const UI = {
         };
         // 智能排队开关
         get('btn-learn-toggle').onclick = () => {
-            State.get(m => { State.set({ [KEYS.IS_LEARN_RUNNING]: !m[KEYS.IS_LEARN_RUNNING] }, () => this.updateState()); });
+            State.get(m => { 
+                const isRunning = !m[KEYS.IS_LEARN_RUNNING];
+                State.set({ 
+                    [KEYS.IS_LEARN_RUNNING]: isRunning,
+                    [KEYS.IS_LEARN_MODE]: true,
+                    [KEYS.IS_ANSWERING]: false
+                }, () => this.updateState()); 
+            });
         };
 
         get('btn-clear').onclick = () => {

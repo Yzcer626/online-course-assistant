@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "学习通全能助手 (自动翻页版) - 乱选速刷",
-  "version": "5.2.0",
-  "description": "智能排队刷课、自动翻页、无脑乱选速刷。",
+  "name": "在线课程助手 (自动翻页版) - 乱选速刷",
+  "version": "5.2.2",
+  "description": "智能排队刷课、自动翻页、无脑乱选速刷（仅供技术交流）。",
   "permissions": [
     "storage"
   ],
@@ -28,7 +28,7 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "xuexitong-scraper@tomgranger.com",
+      "id": "online-course-assistant@tomgranger.com",
       "strict_min_version": "109.0",
       "data_collection_permissions": {
         "required": [

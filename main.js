@@ -168,7 +168,8 @@ const TaskManager = {
         } else {
             // === 🆕 无刷课任务时，检测是否章节测验 ===
             State.get(memory => {
-                if (memory[KEYS.IS_LEARN_MODE]) {
+                if (memory[KEYS.IS_LEARN_MODE] && !memory[KEYS.IS_LEARN_RUNNING]) {
+                    // 只有在刷课未运行时才检测章节测验
                     if (this.isQuizPage()) {
                         console.log(`⚠️ 无刷课任务，但检测到章节测验，切换到答题模式`);
                         toast(`⚠️ 检测到章节测验，切换到答题模式`);
@@ -257,6 +258,8 @@ const TaskManager = {
 
         setTimeout(() => {
             if (this.isRunning) {
+                State.set({ [KEYS.IS_LEARN_RUNNING]: true });
+                
                 currentTask.iframe.contentWindow.postMessage({
                     action: actionCommand,
                     speed: this.globalSpeed
@@ -346,6 +349,8 @@ const TaskManager = {
             toast(`✅ ${typeName} 任务完毕！2秒后开启下一个...`);
             TaskManager.currentIndex++;
     
+            State.set({ [KEYS.IS_LEARN_RUNNING]: false });
+    
             if (TaskManager.isRunning) {
                 setTimeout(() => TaskManager.runNext(), 2000);
             }
@@ -402,10 +407,10 @@ const TaskManager = {
             }
 
             // --- 板块 3: 自动模式切换（主循环检测）---
-            if (memory[KEYS.IS_LEARN_MODE] && !memory[KEYS.IS_ANSWERING] && !memory[KEYS.IS_QUIZ_MODE]) {
+            if (memory[KEYS.IS_LEARN_MODE] && !memory[KEYS.IS_ANSWERING] && !memory[KEYS.IS_QUIZ_MODE] && !memory[KEYS.IS_LEARN_RUNNING]) {
                 const unanswered = document.querySelectorAll(".questionLi:not(.fontLabel), .singleQuesId:not(.fontLabel)").length;
                 const isQuiz = TaskManager.isQuizPage ? TaskManager.isQuizPage() : false;
-                if ((unanswered > 0 || isQuiz) && !memory[KEYS.IS_LEARN_RUNNING]) {
+                if (unanswered > 0 || isQuiz) {
                     console.log(`🔄 自动切换：刷课完成，检测到${unanswered > 0 ? ` ${unanswered} 道未答题` : ''}${isQuiz ? ' 测验页面' : ''}`);
                     State.set({
                         [KEYS.IS_LEARN_MODE]: false,
